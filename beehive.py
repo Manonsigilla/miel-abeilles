@@ -1,5 +1,5 @@
 import random
-from config import NB_BEES, BEEHIVE_POSITION, NB_GENERATIONS
+from config import NB_BEES, BEEHIVE_POSITION, MUTATION_RATE
 import copy
 import math
 
@@ -46,15 +46,17 @@ class Beehive:
 
     def next_generation(self):
         self.bees.sort(key=lambda x: x.path_length)  # Sort bees by path
+        queen = self.bees[0]
         self.bees = self.bees[:len(self.bees) // 2]  # Keep only the best bees
         parents = copy.copy(self.bees)  # Copy the best bees to use as parents 
         # Create new bees for the next generation
         while len(self.bees) < NB_BEES:
             parent1, parent2 = random.sample(parents, 2)
             child_bee = self.crossover(parent1, parent2)
-            if random.random() < 0.1:  # Mutation probability
+            if random.random() < MUTATION_RATE:  # Mutation probability
                 child_bee = self.mutate(child_bee)
             self.bees.append(child_bee)
+        self.bees[-1] = queen  # Ensure the queen bee is always in the population
 
     def print_average_distance(self):
         total_distance = sum(bee.path_length for bee in self.bees)

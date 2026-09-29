@@ -1,5 +1,5 @@
 import random
-from config import NB_BEES, BEEHIVE_POSITION, MUTATION_RATE
+from config import NB_BEES, BEEHIVE_POSITION, MUTATION_RATE, SELECTION_RATE
 import copy
 import math
 
@@ -28,10 +28,12 @@ class Bee:
 
         
 class Beehive:
-    def __init__(self, flowers, beehive_position=BEEHIVE_POSITION):
+    def __init__(self, flowers, beehive_position=BEEHIVE_POSITION, mutation_rate=MUTATION_RATE, selection_rate=SELECTION_RATE):
         self.flowers = flowers
         self.bees = []
         self.beehive_position = beehive_position
+        self.mutation_rate = mutation_rate
+        self.selection_rate = selection_rate
 
     def init_bee(self):
         path = copy.copy(self.flowers)
@@ -47,13 +49,14 @@ class Beehive:
     def next_generation(self):
         self.bees.sort(key=lambda x: x.path_length)  # Sort bees by path
         queen = self.bees[0]
-        self.bees = self.bees[:len(self.bees) // 2]  # Keep only the best bees
+        n_parents = max(2, int(len(self.bees) * self.selection_rate))  # Select top bees as parents
+        self.bees = self.bees[:n_parents]  # Keep only the best bees
         parents = copy.copy(self.bees)  # Copy the best bees to use as parents 
         # Create new bees for the next generation
         while len(self.bees) < NB_BEES:
             parent1, parent2 = random.sample(parents, 2)
             child_bee = self.crossover(parent1, parent2)
-            if random.random() < MUTATION_RATE:  # Mutation probability
+            if random.random() < self.mutation_rate:  # Mutation probability
                 child_bee = self.mutate(child_bee)
             self.bees.append(child_bee)
         self.bees[-1] = queen  # Ensure the queen bee is always in the population
@@ -87,4 +90,7 @@ class Beehive:
         idx1, idx2 = random.sample(range(len(path)), 2)
         path[idx1], path[idx2] = path[idx2], path[idx1]
         return Bee(path, self.beehive_position)
-    
+
+    def get_best_bee(self):
+        self.bees.sort(key=lambda x: x.path_length)
+        return self.bees[0]

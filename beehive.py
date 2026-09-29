@@ -47,6 +47,14 @@ class Beehive:
     def next_generation(self):
         self.bees.sort(key=lambda x: x.path_length)  # Sort bees by path
         self.bees = self.bees[:len(self.bees) // 2]  # Keep only the best bees
+        parents = copy.copy(self.bees)  # Copy the best bees to use as parents 
+        # Create new bees for the next generation
+        while len(self.bees) < NB_BEES:
+            parent1, parent2 = random.sample(parents, 2)
+            child_bee = self.crossover(parent1, parent2)
+            if random.random() < 0.1:  # Mutation probability
+                child_bee = self.mutate(child_bee)
+            self.bees.append(child_bee)
 
     def print_average_distance(self):
         total_distance = sum(bee.path_length for bee in self.bees)
@@ -71,3 +79,10 @@ class Beehive:
 
         return Bee(child_path, self.beehive_position)
         
+    def mutate(self, bee):
+        # randomly choose 2 hints in the path and swap them with flowers in bee.path then recalculate the path length
+        path = copy.copy(bee.path)
+        idx1, idx2 = random.sample(range(len(path)), 2)
+        path[idx1], path[idx2] = path[idx2], path[idx1]
+        return Bee(path, self.beehive_position)
+    

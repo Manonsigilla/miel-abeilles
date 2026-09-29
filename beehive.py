@@ -58,10 +58,10 @@ class Beehive:
             self.bees.append(child_bee)
         self.bees[-1] = queen  # Ensure the queen bee is always in the population
 
-    def print_average_distance(self):
+    def get_average_distance(self):
         total_distance = sum(bee.path_length for bee in self.bees)
         average_distance = total_distance / len(self.bees)
-        print(f"Average distance: {average_distance}")
+        return average_distance
 
     def crossover(self, parent1, parent2):
         # Create a child path by combining parts of both parents

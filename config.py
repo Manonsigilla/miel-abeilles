@@ -1,5 +1,5 @@
 NB_BEES = 101
-FLOWERS_PATH = "./data/champ_pissenlit_sauge.csv"
+FLOWERS_PATH = "./miel-abeilles/data/champ_pissenlit_sauge.csv"
 BEEHIVE_POSITION = (500, 500)
 NB_GENERATIONS = 50
 MUTATION_RATE = 0.1

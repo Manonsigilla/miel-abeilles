@@ -1,4 +1,5 @@
 import csv
+import matplotlib.pyplot as plt
 from config import FLOWERS_PATH, NB_GENERATIONS
 from beehive import Beehive, Bee
 
@@ -18,9 +19,17 @@ def main():
     b = Beehive(flowers)
     b.init_bees()
 
+    history = []
+    
     for i in range(NB_GENERATIONS):
         b.next_generation()
-        b.print_average_distance()
+        history.append(b.get_average_distance())
+
+    plt.plot(history)
+    plt.xlabel("Generation")
+    plt.ylabel("Average Distance")
+    plt.title("Average Distance Evolution Over Generations")
+    plt.show()
 
 if __name__ == "__main__":
     main()

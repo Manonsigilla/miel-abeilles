@@ -1,5 +1,6 @@
 import csv
 import matplotlib.pyplot as plt
+import networkx as nx
 from config import FLOWERS_PATH, NB_GENERATIONS
 from beehive import Beehive
 
@@ -36,6 +37,40 @@ def plot_comparison(flowers, param_name, values, fixed_mutation=0.1, fixed_selec
     plt.xlabel("Generation")
     plt.ylabel("Average Distance")
     plt.title(f"Comparison for {param_name}")
+    plt.show()
+
+def plot_genealogy(beehive, root_bee, max_depth):
+    """Draw the genealogy tree of root_bee, going back max_depth generations.
+
+    Each generation gets its own colour, the root (the best bee) sits at the bottom.
+    """
+    tree = beehive.get_genealogy_tree(root_bee, max_depth)
+
+    # One horizontal row per generation. Edges go parent -> child, so we walk the reversed graph to get the layers: layer 0 is the root, higher layers are ancestors.
+    layers = list(nx.bfs_layers(tree.reverse(), root_bee.bee_id))
+    positions = {}
+    for depth, layer in enumerate(layers):
+        for i, node in enumerate(layer):
+            positions[node] = (i - (len(layer) - 1) / 2, depth)
+
+    # Distinct colour per generation (tab20 cycles if there are more than 20 generations).
+    cmap = plt.get_cmap("tab20")
+    colours = [cmap(depth % cmap.N) for depth in range(len(layers))]
+
+    plt.figure(figsize=(14, 8))
+    # Draw edges as plain grey lines, using an undirected copy so networkx adds no arrowheads that would clutter such a dense tree.
+    nx.draw_networkx_edges(tree.to_undirected(), positions, edge_color="lightgrey", width=0.5)
+    for depth, layer in enumerate(layers):
+        nx.draw_networkx_nodes(tree, positions, nodelist=list(layer),
+                               node_color=[colours[depth]] * len(layer), node_size=15)
+        # Empty scatter, only used to build the legend.
+        label = "best bee" if depth == 0 else f"{depth} generation(s) back"
+        plt.scatter([], [], color=colours[depth], s=40, label=label)
+
+    plt.legend(loc="center left", bbox_to_anchor=(1.01, 0.5), ncol=1, fontsize=8)
+    plt.title(f"Genealogy tree - {max_depth} generations ({len(tree.nodes)} bees)")
+    plt.axis("off")
+    plt.subplots_adjust(right=0.82)
     plt.show()
 
 def main():
